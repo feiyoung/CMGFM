@@ -20,13 +20,13 @@ This vignette introduces the usage of CMGFM for the analysis of high-dimensional
 
 
 The package can be loaded with the command:
-```{r  eval = TRUE}
+```{r  eval = FALSE}
 library(CMGFM)
 ```
 
 ## Generate the simulated data
 First, we generate the data simulated data. 
-```{r  eval = TRUE}
+```{r  eval = FALSE}
 pveclist <- list('gaussian'=c(50, 150),'poisson'=c(50, 150),
                  'binomial'=c(100,60))
 q <- 6
@@ -52,7 +52,7 @@ for(id in 1:length(datlist$Uplist)){
 types <- datlist$types
 ```
 Fit the CMGFM model using the function `CMGFM()` in the R package `CMGFM`. Users can use `?CMGFM` to see the details about this function
-```{r  eval = TRUE}
+```{r  eval = FALSE}
 system.time({
   tic <- proc.time()
   rlist <- CMGFM(XList, Z, types=types, q=q, numvarmat=numvarmat)
@@ -63,7 +63,7 @@ system.time({
 
 
 Check the increased property of the evidence lower bound function.
-```{r  eval = TRUE}
+```{r  eval = FALSE}
 library(ggplot2)
 dat_iter <- data.frame(iter=1:length(rlist$ELBO_seq), ELBO=rlist$ELBO_seq)
 ggplot(data=dat_iter, aes(x=iter, y=ELBO)) + geom_line() + geom_point() + theme_bw(base_size = 20)
@@ -71,7 +71,7 @@ ggplot(data=dat_iter, aes(x=iter, y=ELBO)) + geom_line() + geom_point() + theme_
 ```
 
 We calculate the metrics to measure the estimation accuracy, where the trace statistic is used to measure the estimation accuracy of loading matrix and prediction accuracy of factor matrix, which is evaluated by the function `measurefun()` in the R package `GFM`, and the root of mean square error is adopted to measure the estimation error of bbeta.
-```{r  eval = TRUE}
+```{r  eval = FALSE}
 library(GFM)
 hUplist <- lapply(seq_along(rlist$Bf), function(m) cbind(rlist$muf[[m]], rlist$Bf[[m]]))
 metricList <- list()
@@ -96,7 +96,7 @@ We compare CMGFM with various prominent methods in the literature. They are (1) 
 
 (1). First, we implemented the generalized factor model (LFM) and record the metrics that measure the estimation accuracy and computational cost.
 
-```{r  eval = TRUE}
+```{r  eval = FALSE}
 metricList$GFM <- list()
 tic <- proc.time()
 res_gfm <- gfm(XList, types=types, q=q)
@@ -123,7 +123,7 @@ metricList$GFM$Time <- time_gfm
 
 (2) Eightly, we implemented the first version of multi-response reduced-rank Poisson regression model (MMMR, Luo et al. 2018) implemented in rrpack R package (MRRR-Z), that did not consider the latent factor structure but only the covariates.
 
-```{r  eval = TRUE}
+```{r  eval = FALSE}
 mrrr_run <- function(Y, Z, numvarmat, rank0,family=list(poisson()),
                      familygroup,  epsilon = 1e-4, sv.tol = 1e-2,
                      lambdaSVD=0.1, maxIter = 2000, trace=TRUE, trunc=500){
@@ -196,7 +196,7 @@ res_mrrr <- mrrr_run(Reduce(cbind, datlist$XList),  Z = Z, numvarmat, rank0=q, f
 
 
 ```
-```{r  eval = TRUE}
+```{r  eval = FALSE}
 metricList$MRRR <- list()
 metricList$MRRR$Tr_F <- measurefun(res_mrrr$hH, datlist$F0)
 metricList$MRRR$Tr_Upsilon <-meanTr(mat2list(cbind(res_mrrr$hmu,res_mrrr$hB), pvec), Uplist)
@@ -210,7 +210,7 @@ metricList$MRRR$Time <- res_mrrr$time_use
 ## Visualize the comparison of performance
 
 Next, we summarized the metrics for COAP and other compared methods in a dataframe object.
-```{r  eval = TRUE}
+```{r  eval = FALSE}
 list2vec <- function(xlist){
   nn <- length(xlist)
   me <- rep(NA, nn)
@@ -229,7 +229,7 @@ dat_metric
 ```
 
 Plot the results for COAP and other methods, which suggests that CMGFM achieves better estimation accuracy for the quantities of interest.
-```{r  eval = TRUE, fig.width=9, fig.height=6}
+```{r  eval = FALSE, fig.width=9, fig.height=6}
 library(cowplot)
 p1 <- ggplot(data=subset(dat_metric, !is.na(Tr_F)), aes(x= Method, y=Tr_F, fill=Method)) + geom_bar(stat="identity") + xlab(NULL) + scale_x_discrete(breaks=NULL) + theme_bw(base_size = 16)
 p2 <- ggplot(data=subset(dat_metric, !is.na(Tr_Upsilon)), aes(x= Method, y=Tr_Upsilon, fill=Method)) + geom_bar(stat="identity") + xlab(NULL) + scale_x_discrete(breaks=NULL)+ theme_bw(base_size = 16)
@@ -242,7 +242,7 @@ plot_grid(p1,p2,p3, p4, nrow=2, ncol=2)
 ## Select the parameters
 
 We applied the maximum singular value ratio based method to select the number of factors. The results showed that  the maximum SVR method has the potential to identify the true values.
-```{r  eval = TRUE}
+```{r  eval = FALSE}
 
 hq <- MSVR(XList, Z, types=types, numvarmat, q_max=20)
 
